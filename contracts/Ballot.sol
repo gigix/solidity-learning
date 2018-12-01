@@ -7,6 +7,7 @@ contract Ballot {
     }
 
     Proposal [] proposals;
+    address public chairPerson;
 
     constructor(uint _numberOfProposals) public {
         proposals.length = _numberOfProposals;

@@ -17,6 +17,7 @@ contract BallotTest {
 
     function test_ballot_can_be_initiated() public {
         Assert.equal(ballot.numberOfProposals(), 3, "Number of proposals should be as initiated");
+        Assert.equal(ballot.chairPerson(), msg.sender, "Chair person should be initiated");
     }
 
     function test_ballot_can_be_voted() public {
