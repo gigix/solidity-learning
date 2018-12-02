@@ -1,3 +1,5 @@
+require('truffle-test-utils').init();
+
 const Ballot = artifacts.require('Ballot')
 
 contract('Ballot', async(accounts) => {
@@ -28,7 +30,13 @@ contract('Ballot', async(accounts) => {
         ballot.startVoting()
 
         ballot.vote(1)
-        ballot.finishVoting()
+        var result = await ballot.finishVoting()
+        assert.web3Event(result, {
+          event: 'VotingFinished',
+            args: {
+              winningProposal: 1
+          }
+        }, 'The event is emitted');
 
         let winningProposal = await ballot.winningProposal()
         assert.equal(winningProposal, 1, 'voted proposal should be winning')

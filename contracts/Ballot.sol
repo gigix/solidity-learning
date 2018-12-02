@@ -13,6 +13,8 @@ contract Ballot {
 
     enum Stage {Init, Reg, Vote, Done}
 
+    event VotingFinished(uint winningProposal);
+
     Proposal [] proposals;
     mapping(address => Voter) voters;
     address public chairPerson;
@@ -52,6 +54,7 @@ contract Ballot {
 
     function finishVoting() public onlyAtStage(Stage.Vote) onlyBy(chairPerson) {
         stage = Stage.Done;
+        emit VotingFinished(winningProposal());
     }
 
     function vote(uint _indexOfProposal) public onlyAtStage(Stage.Vote) {
