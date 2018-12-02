@@ -11,12 +11,20 @@ contract Ballot {
         bool alreadyVoted;
     }
 
+    enum Stage {Init, Reg, Vote, Done}
+
     Proposal [] proposals;
     mapping(address => Voter) voters;
     address public chairPerson;
+    Stage public stage = Stage.Init;
 
     modifier onlyBy(address _account) {
         require(msg.sender == _account);
+        _;
+    }
+
+    modifier onlyAtStage(Stage _stage) {
+        require(stage == _stage);
         _;
     }
 
@@ -34,7 +42,19 @@ contract Ballot {
         return proposals.length;
     }
 
-    function vote(uint _indexOfProposal) public {
+    function startRegistration() public onlyAtStage(Stage.Init) onlyBy(chairPerson) {
+        stage = Stage.Reg;
+    }
+
+    function startVoting() public onlyAtStage(Stage.Reg) onlyBy(chairPerson) {
+        stage = Stage.Vote;
+    }
+
+    function finishVoting() public onlyAtStage(Stage.Vote) onlyBy(chairPerson) {
+        stage = Stage.Done;
+    }
+
+    function vote(uint _indexOfProposal) public onlyAtStage(Stage.Vote) {
         Voter storage voter = voters[msg.sender];
         if(voter.alreadyVoted) {
             return;
@@ -44,7 +64,7 @@ contract Ballot {
         voter.alreadyVoted = true;
     }
 
-    function register(address[] _voters) public onlyBy(chairPerson) {
+    function register(address[] _voters) public onlyAtStage(Stage.Reg) onlyBy(chairPerson) {
         for(uint i = 0; i < _voters.length; i++) {
             address voterAddress = _voters[i];
             if(voters[voterAddress].weight == 0) {
@@ -53,7 +73,7 @@ contract Ballot {
         }
     }
 
-    function winningProposal() constant public returns(uint) {
+    function winningProposal() constant public onlyAtStage(Stage.Done) returns(uint) {
         uint candidate = 0;
         for(uint i = 0; i < numberOfProposals(); i++) {
             if(proposals[i].voteCount > proposals[candidate].voteCount) {
