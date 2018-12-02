@@ -64,12 +64,10 @@ contract Ballot {
         voter.alreadyVoted = true;
     }
 
-    function register(address[] _voters) public onlyAtStage(Stage.Reg) onlyBy(chairPerson) {
-        for(uint i = 0; i < _voters.length; i++) {
-            address voterAddress = _voters[i];
-            if(voters[voterAddress].weight == 0) {
-                voters[voterAddress].weight = 1;
-            }
+    function register() public onlyAtStage(Stage.Reg) {
+        address voterAddress = msg.sender;
+        if(voters[voterAddress].weight == 0) {
+            voters[voterAddress].weight = 1;
         }
     }
 

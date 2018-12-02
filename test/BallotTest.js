@@ -69,7 +69,7 @@ contract('Ballot', async(accounts) => {
         assert.notEqual(normalVoter, chairPerson)
 
         ballot.startRegistration()
-        ballot.register([normalVoter])
+        ballot.register({from: normalVoter})
         ballot.startVoting()
 
         ballot.vote(1, {from: normalVoter})
@@ -84,41 +84,22 @@ contract('Ballot', async(accounts) => {
         let normalVoter = accounts[1]
 
         try {
-            await ballot.register([normalVoter])
+            await ballot.register({from: normalVoter})
             assert.fail('exception expected')
         } catch(error) {
             assert( /invalid opcode|revert/.test(error), 'the error message should be invalid opcode or revert' )
         }
 
         ballot.startRegistration()
-        ballot.register([normalVoter])
+        ballot.register({from: normalVoter})
 
         ballot.startVoting()
         try {
-            await ballot.register([normalVoter])
+            await ballot.register({from: normalVoter})
             assert.fail('exception expected')
         } catch(error) {
             assert( /invalid opcode|revert/.test(error), 'the error message should be invalid opcode or revert' )
         }
-    })
-
-    it('should only allow chair person to register voters', async() => {
-        let normalVoter = accounts[1]
-        ballot.startRegistration()
-
-        try {
-            await ballot.register([normalVoter], {from: normalVoter})
-            assert.fail('exception expected')
-        } catch(error) {
-            assert( /invalid opcode|revert/.test(error), 'the error message should be invalid opcode or revert' )
-        }
-
-        ballot.startVoting()
-        ballot.vote(1, {from: normalVoter})
-
-        ballot.finishVoting()
-        let winningProposal = await ballot.winningProposal()
-        assert.equal(winningProposal, 0, 'unregistered vote should be ignored')
     })
 
     it('should only allow voting at VOTE stage', async() => {
@@ -157,7 +138,7 @@ contract('Ballot', async(accounts) => {
         let normalVoter = accounts[2]
 
         ballot.startRegistration()
-        ballot.register([normalVoter])
+        ballot.register({from: normalVoter})
 
         ballot.startVoting()
         ballot.vote(1, {from: unregisteredVoter})
@@ -172,7 +153,8 @@ contract('Ballot', async(accounts) => {
         let cheater = accounts[1]
 
         ballot.startRegistration()
-        ballot.register([normalVoter, cheater])
+        ballot.register({from: normalVoter})
+        ballot.register({from: cheater})
 
         ballot.startVoting()
         ballot.vote(1, {from: normalVoter})
